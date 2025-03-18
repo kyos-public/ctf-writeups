@@ -1,17 +1,23 @@
+# The Quiet Fruit
 
- 📝 _Category : Forensics 💯 _Number of points : 97_
- 
-### Challenge Description
-A user on Windows 11 was compromised, and our objective was to identify three persistence mechanisms left on the disk.
+ 📝 _Category_ : Forensics  - 💯 _Number of points_ : 97
 
-We were provided with a ZIP file containing a disk extraction made using KAPE, a forensic tool designed for rapid artifact collection and parsing.
+## Challenge Description
+
+_As a forensic analyst, your mission is to identify all persistence mechanisms implanted on a compromised Windows 11 device._
+
+_The flag is split into three parts: INS_PART1{part1}, INS_PART2{part2}, and INS_PART3{part3}._
+_The final flag is obtained by concatenating the three parts: INS{part1part2part3}.
+
+_Note: There’s a one-time easter egg hidden in this challenge (as usual) — only the first person to find it will win a goody 😉 - Send me the easter flag in PM on Discord._
+
+We were provided with a ZIP file containing a disk extraction made using [KAPE](https://www.kroll.com/en/insights/publications/cyber/kroll-artifact-parser-extractor-kape), a forensic tool designed for rapid artifact collection and parsing.
 
 ---
 
 ## Part 1 - Policy-Based Execution
 
 Upon analyzing the extracted C drive files, I quickly noticed that the `Users` directory was empty, suggesting possible cleanup, evasion techniques, or simply that no user profiles were present in the extracted disk image. Checking installed applications in `C\Program Files\`, the only non-default program was **KeePass Password Safe 2**.  Digging deeper, I found two interesting policy files in its directory:
-
 
 - `KeePass.config.enforced.xml`
 - `KeePass.config.xml`
@@ -99,8 +105,8 @@ This script:
 Extracting the fake log:
 
 ```bash
-$ mv C\Windows\System32\winevt\logs\Microsoft-Windows-Hyper-V-VID-Admin.evtx ./a.zip
-$ unzip ./a.zip
+mv C\Windows\System32\winevt\logs\Microsoft-Windows-Hyper-V-VID-Admin.evtx ./a.zip
+unzip ./a.zip
 ```
 
 Inside, I found:
@@ -146,10 +152,10 @@ Decoding another **Base64-encoded string**, I found:
 
 Using the keepass2john:
 
-```
-$ python keepass2john.py VeryConfidential.kdbx > VeryConfidential.txt
+```bash
+python keepass2john.py VeryConfidential.kdbx > VeryConfidential.txt
 
-$ john --format=keepass VeryConfidential.txt
+john --format=keepass VeryConfidential.txt
 ```
 
 John finds that password is `Sexyme`
@@ -157,7 +163,6 @@ John finds that password is `Sexyme`
 Simply open the vault using the password, there is one entry called "Easter Egg" with the flag in it.
 
 **Easter Egg Flag** : `INSOTP{E@st3rEgG!!!}`
-
 
 ---
 
@@ -181,4 +186,6 @@ Some players took a **faster but less investigative** approach by **grepping for
 - The **fake .evtx file** hiding exfiltrated data was a clever trick.
 - It was a satisfying challenge with **real-world forensic relevance**!
 
-![Challenge Resolved Grepping Base64 Meme](./images/MemeB64ChallResolved.png)
+<p align="center">
+  <img src="images/MemeB64ChallResolved.png" />
+</p>
