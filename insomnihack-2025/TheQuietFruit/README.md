@@ -13,8 +13,6 @@ _Note: There’s a one-time easter egg hidden in this challenge (as usual) — o
 
 We were provided with a ZIP file containing a disk extraction made using [KAPE](https://www.kroll.com/en/insights/publications/cyber/kroll-artifact-parser-extractor-kape), a forensic tool designed for rapid artifact collection and parsing.
 
----
-
 ## Part 1 - Policy-Based Execution
 
 Upon analyzing the extracted C drive files, I quickly noticed that the `Users` directory was empty, suggesting possible cleanup, evasion techniques, or simply that no user profiles were present in the extracted disk image. Checking installed applications in `C\Program Files\`, the only non-default program was **KeePass Password Safe 2**.  Digging deeper, I found two interesting policy files in its directory:
@@ -60,8 +58,6 @@ Inspecting `KeePass.config.enforced.xml`, I discovered an XML configuration spec
 The **Base64-encoded string** caught my eye. Decoding it using **CyberChef** revealed the first flag:
 
 **Flag 1:** `INS_PART1{Ke3P@sc@BackD00r}`
-
----
 
 ## Part 2 - PowerShell Logs & Malicious Service
 
@@ -116,8 +112,6 @@ Inside, I found:
 
 **Flag 2:** `INS_PART2{N@ughTyS3rv!ce}`
 
----
-
 ## Part 3 - WMI Persistence
 
 I felt close to solving the last flag. I merged event logs using [Merge_the_events.ps1](https://github.com/abhinav-eyesOnglass/evtx/blob/master/Merge_the_events.ps1):
@@ -146,8 +140,6 @@ Decoding another **Base64-encoded string**, I found:
 
 **Flag 3:** `INS_PART3{WMI_Always_Does_The_Job}`
 
----
-
 ## Easter Eggs
 
 Using the keepass2john:
@@ -164,8 +156,6 @@ Simply open the vault using the password, there is one entry called "Easter Egg"
 
 **Easter Egg Flag** : `INSOTP{E@st3rEgG!!!}`
 
----
-
 ## Final Flag
 
 Concatenating all parts as instructed:
@@ -173,8 +163,6 @@ Concatenating all parts as instructed:
 ```
 INS{Ke3P@sc@BackD00rN@ughTyS3rv!ceWMI_Always_Does_The_Job}
 ```
-
----
 
 ### Alternative Solution - Grepping Encoded Flags
 
