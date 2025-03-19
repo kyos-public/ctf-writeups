@@ -55,7 +55,7 @@ Inspecting `KeePass.config.enforced.xml`, I discovered an XML configuration spec
 </Configuration>
 ```
 
-The **Base64-encoded string** caught my eye. Decoding it using **CyberChef** revealed the first flag:
+The **Base64-encoded string** caught my eye `SU5TX1BBUlQxe0tlM1BAcyRCYWNrRDAwcn0`. Decoding it using **CyberChef** revealed the first flag:
 
 **Flag 1:** `INS_PART1{Ke3P@sc@BackD00r}`
 
@@ -198,7 +198,7 @@ instance of CommandLineEventConsumer
 
 This mechanism leverages **`__EventFilter`** to monitor logon sessions and triggers **`CommandLineEventConsumer`** to run `ChromeSetup.exe` whenever a user logs in, ensuring persistence.
 
-Decoding another **Base64-encoded string**, I found:
+Decoding another **Base64-encoded string** `SU5TX1BBUlQze1dNSV9BbHdheXNfRG9lc19UaGVfSm9ifQ` , I found:
 
 **Flag 3:** `INS_PART3{WMI_Always_Does_The_Job}`
 
