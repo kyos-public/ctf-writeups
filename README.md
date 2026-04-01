@@ -9,3 +9,7 @@ Solutions to "capture the flag" (CTF) challenges, by [Kyos](https://kyos.ch).
 ## Insomni'Hack 2025
 
 - [Forensics - The Quiet Fruit](insomnihack-2025/TheQuietFruit/README.md)
+
+## Insomni'Hack 2026
+
+- [Cryptography - Smooth RSA](insomnihack-2026/smooth-rsa/README.md)
