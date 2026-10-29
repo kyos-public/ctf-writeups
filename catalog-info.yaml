@@ -14,5 +14,6 @@ metadata:
     github.com/project-slug: kyos-public/ctf-writeups
 spec:
   type: documentation
+  lifecycle: production
   owner: group:kyos/it-team
   system: security-ops
